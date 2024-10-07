@@ -6,6 +6,7 @@
 
 import pycurl, io, hashlib, datetime, os, glob, argparse, re, json
 from urllib.parse import urlencode
+import urllib.request
 
 from tqdm import tqdm
 from pathlib import Path
@@ -102,6 +103,7 @@ if len(ifiles) == 0:
     exit(0)
     
 print("Found %d WSI images in folder, start import now" % (len(ifiles)))
+stain_from_SNOMEDCT = {}
 
 for f in ifiles:
     ext = os.path.splitext(f)[-1].lower()
@@ -151,6 +153,33 @@ for f in ifiles:
         obj["patho_department"] = match.group("pathodepartment").strip()
     if match.groupdict().get("imageid") != None:
         obj["patho_image_id"] = match.group("imageid").strip()
+        
+    # replace stain with code found in SNOMEDCT, cache results to speed up processing
+    if not (obj["patho_stain"] in stain_from_SNOMEDCT):
+        # query SNOMEDCT and our internal list first, use the IDcode entry
+        get_args = {
+            "search": obj["patho_stain"],
+            "type": 'public',
+            "root": 'http://purl.bioontology.org/ontology/SNOMEDCT/127790008',
+            "ontology": 'SNOMEDCT'
+        }
+        with urllib.request.urlopen("https://fiona.ihelse.net/applications/Attach/php/bioontology_search.php?%s" % (urllib.parse.urlencode(get_args))) as url:
+            data = json.load(url)
+            # try the public list first
+            e = obj["patho_stain"]
+            if "bioontology" in data:
+                if len(data["bioontology"]["collection"]) > 0:
+                    e = data["bioontology"]["collection"][0]["cui"][0]
+                    if "@id" in data["bioontology"]["collection"][0]:
+                        e = data["bioontology"]["collection"][0]["@id"].split("/")[-1]
+            elif "institution" in data:
+                if len(data["institution"]) > 0:
+                    e = data["institution"][0]["IDcode"]
+            stain_from_SNOMEDCT[obj["patho_stain"]] = e
+        pass
+    # replace the stain with the database entry for it
+    obj["patho_stain"] = stain_from_SNOMEDCT[obj["patho_stain"]]
+        
     # now validate what is good enough as a dataset (required fields)
     required_not_empty = [ "project_name", "record_id", "redcap_event_name", "patho_image_id" ]
     validObj = True
