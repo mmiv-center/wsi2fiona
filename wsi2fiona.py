@@ -173,7 +173,7 @@ for f in ifiles:
                     if "@id" in data["bioontology"]["collection"][0]:
                         e = data["bioontology"]["collection"][0]["@id"].split("/")[-1]
                         e = "[%s] %s" % (e, data["bioontology"]["collection"][0]["prefLabel"])
-            elif "institution" in data:
+            if e == obj["patho_stain"] and "institution" in data:
                 if len(data["institution"]) > 0:
                     e = data["institution"][0]["IDcode"]
                     e = "[%s] %s" % (e, data["institution"][0]["long"])
