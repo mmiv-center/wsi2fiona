@@ -172,9 +172,11 @@ for f in ifiles:
                     e = data["bioontology"]["collection"][0]["cui"][0]
                     if "@id" in data["bioontology"]["collection"][0]:
                         e = data["bioontology"]["collection"][0]["@id"].split("/")[-1]
+                        e = "[%s] %s" % (e, data["bioontology"]["collection"][0]["prefLabel"])
             elif "institution" in data:
                 if len(data["institution"]) > 0:
                     e = data["institution"][0]["IDcode"]
+                    e = "[%s] %s" % (e, data["institution"][0]["long"])
             stain_from_SNOMEDCT[obj["patho_stain"]] = e
         pass
     # replace the stain with the database entry for it
