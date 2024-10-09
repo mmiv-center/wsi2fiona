@@ -1,6 +1,6 @@
 # WSI2FIONA
 
-Import whole-slide-images into research PACS by submitting to FIONA.
+Automate the import of whole-slide-images into research PACS by submitting to FIONA.
 
 
 ### Usage
