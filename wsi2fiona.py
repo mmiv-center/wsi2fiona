@@ -167,7 +167,7 @@ for f in ifiles:
             data = json.load(url)
             # try the public list first
             e = obj["patho_stain"]
-            if "bioontology" in data:
+            if "bioontology" in data and data['bioontology'] != None:
                 if len(data["bioontology"]["collection"]) > 0:
                     e = data["bioontology"]["collection"][0]["cui"][0]
                     if "@id" in data["bioontology"]["collection"][0]:
